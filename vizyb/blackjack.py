@@ -123,6 +123,7 @@ def play_a_round(dealer, gambler, wagered_amount):
     gambler.hand.append(dealer.deck.cards.pop())
     dealer.hand.append(dealer.deck.cards.pop())
     gambler.hand.append(dealer.deck.cards.pop())
+    dealer.hand.append(dealer.deck.cards.pop())
     gambler_value = count_values(gambler)
     print("Dealer: " + str(dealer.hand))
     while gambler_value < 21:  # Player draws
@@ -138,7 +139,7 @@ def play_a_round(dealer, gambler, wagered_amount):
     gambler_value = count_values(gambler)
     dealer_value = count_values(dealer)  # calculate whether to draw
 
-    while dealer_value < 17 and gambler_value <= 21:  # Dealer draws
+    while dealer_value < 17 and gambler_value < 21:  # Dealer draws
         dealer.hand.append(dealer.deck.cards.pop())
         dealer_value = count_values(dealer)  # recalculate
     print("Dealer: " + str(dealer.hand))

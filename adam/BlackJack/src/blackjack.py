@@ -11,39 +11,44 @@ Completed: AP -
 import random
 import sys
 
-def gen_cards():
-    c = 1
-    spec = {
-        "11":"J",
-        "12":"Q",
-        "13":"K",
-        "1": "A"
-    }
-    while True and c != 14:
-        if c < 11 and c != 1:
-            yield c
-            c += 1
-        else:
-            yield spec[str(c)]
-            c +=1
+
+class Deck:
+    suites = ["clubs", "hearts", "spades", "diamonds"]
+    cards = []
+
+    def __init__(self):
+        for suite in self.suites:
+            for card in self.gen_cards():
+                self.cards.append([suite, card])
+
+    def gen_cards(self):
+        c = 1
+        spec = {
+            "11":"J",
+            "12":"Q",
+            "13":"K",
+            "1": "A"
+        }
+        while True and c != 14:
+            if c < 11 and c != 1:
+                yield c
+                c += 1
+            else:
+                yield spec[str(c)]
+                c +=1
 
 
-suites = ["clubs", "hearts", "spades", "diamonds"]
-cards = []
-for suite in suites:
-    for card in gen_cards():
-        cards.append([suite,card])
 
-
-def deal_card(deck: list) -> str:
-    myrand = random.randint(0, len(deck)-1)
-    mycard = deck.pop(myrand)
-    print("THIS CARD DEALT: {}".format(mycard))
-    return mycard
+    def deal_card(self) -> str:
+        myrand = random.randint(0, len(self.cards)-1)
+        mycard = self.cards.pop(myrand)
+        print("THIS CARD DEALT: {}".format(mycard))
+        return mycard
 
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, deck):
+        self.deck = deck
         self.name = name
         self.role = "NON-DEALER"
         self.won = 0
@@ -100,7 +105,7 @@ class Player:
             if self.check_hand() == "READY":
                 getcard = input("Would you like to HIT for a new card?")
                 if getcard.lower() in ["yes", "y"]:
-                    self.cards.append(deal_card(cards))
+                    self.cards.append(self.deck.deal_card())
                     self.check_hand()
                 else:
                     self.done = True
@@ -110,7 +115,7 @@ class Player:
                 self.lost = 1
         elif self.role == "DEALER":
             if self.check_hand() == "READY":
-                self.cards.append(deal_card(cards))
+                self.cards.append(self.deck.deal_card())
                 self.check_hand()
                 print(self.total)
         else:
@@ -118,30 +123,32 @@ class Player:
 
 
 class Dealer(Player):
-    def __init__(self, myname):
-        super().__init__(myname)
+    def __init__(self, myname, deck):
+        super().__init__(myname, deck)
         self.role = "DEALER"
+        self.deck = deck
 
     def deal_cards(self, myplayers):
         """ Deal a card for each player. """
         for player in myplayers:
-            player.cards.append(deal_card(cards))
+            player.cards.append(self.deck.deal_card())
         self.draw_card()
         print("Dealer has this cards {}.".format(self.cards))
 
     def draw_card(self):
-        self.cards.append(deal_card(cards))
+        self.cards.append(self.deck.deal_card())
 
 
 
 class Game:
 
     def __init__(self):
+        self.deck = Deck()
         self.players = []
         self.totalplayers = len(self.players)
         self.losers = []
         self.winner = []
-        self.dealer = Dealer("Mr. Dealer (^_^)")
+        self.dealer = Dealer("Mr. Dealer (^_^)", self.deck)
         self.register_game()
         self.the_play()
 
@@ -154,7 +161,7 @@ class Game:
             if myplayer.lower() == "play":
                 self.newplayers = False
             else:
-                self.players.append(Player(myplayer))
+                self.players.append(Player(myplayer, self.deck))
         return self.players
 
     def check_game_status(self) -> bool:

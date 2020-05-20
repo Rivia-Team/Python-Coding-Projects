@@ -21,28 +21,21 @@ specified age:
     import sys
 """
 import datetime
-import subprocess
 import os
 import sys
 
 
-def validate_arguments(argvs: int, validationamt=4) -> bool:
+def validate_arguments(argvs: list, validationamt=4) -> bool:
     """Validate we have all the required options."""
     if len(argvs) == validationamt:
-        print(os.path.isdir(sys.argv[1]))
-        if os.path.isfile(sys.argv[1]) == True:
-            int(sys.argv[2])
+        if os.path.isdir(sys.argv[1]):
             try:
-                print(int(sys.argv[2]))
-            except ValueError as e:
-                print(f"Not a valid input for size. ERROR: {e}")
-                return False
-            try:
+                int(sys.argv[2])
                 int(sys.argv[3])
             except ValueError as e:
                 print(f"Not a valid input for days. ERROR: {e}")
                 return False
-        elif os.path.isdir(sys.argv[1]) == False:
+        elif not os.path.isdir(sys.argv[1]):
             print("ERROR: Invalid directory.")
             return False
         return True
@@ -51,46 +44,42 @@ def validate_arguments(argvs: int, validationamt=4) -> bool:
 
 
 def display_hints():
-    """Remind user correct inputs to this application."""
+    """Remind user of correct inputs to this application."""
     print('''\n
     First argument: directory path "/etc/services" \n
     Second argument: file size or greater in bytes "1000" \n
     Third argument: file age or greater in days to look for "7" \n''')
 
 
-def analyze_directory(mydir: str, minsize: str, mindate: str) -> bytes:
-    """ Output the directory and organize.ArithmeticError """
-    try:
-        myout = subprocess.run(["find","{}".format(mydir),"-mtime","+"+mindate,"-size","+"+minsize+"c","-ls"],capture_output=True)
-        return myout.stdout
-    except FileNotFoundError as e:
-        print(f"There was an issue with the command syntax. ERROR: {e}")
-    except TypeError as e:
-        print(f"Use python 3.7+ ERROR: {e}")
-
-def analyze_directory_py(mydir: str, minsize: str, mindate: str):
+def analyze_directory_py(mydir: str, minsize: str, mindate: str) -> list:
+    """ Parse the arguments. """
     startdate = datetime.date.today() - datetime.timedelta(days=int(mindate))
-    print("Looking for files older than: {}".format(startdate))
-    filesindir = os.listdir(mydir)
+    print("  - Looking for files older than: {}".format(startdate))
+    print("  - Looking for files greater than: {} bytes \n".format(minsize))
+    try:
+        filesindir = os.listdir(mydir)
+    except FileNotFoundError as e:
+        print(f"The directory has changed since program start up. {e}")
     validfileslist = []
     for file in filesindir:
         if os.path.getsize(file) > int(minsize):
-            print("FILE {} is GREATER than desired size!".format(file))
             timestamp = datetime.date.fromtimestamp(os.path.getmtime(file))
-            if (timestamp > startdate):
-                print("Comparing {} to {}".format(timestamp, startdate))
-                print("This file: {} has a modified date of {}:".format(file, timestamp))
-                validfileslist.append(file)
-        else:
-            print("FILE {} is LESS than desired size!".format(file))
+        if timestamp < startdate:
+            validfileslist.append([file, timestamp.__str__(), os.path.getsize(file)])
     return validfileslist
 
+
 def main():
-    if validate_arguments(sys.argv) == True:
-        print("Valid inputs. Processing your request!")
-        #mydir = analyze_directory(sys.argv[1],sys.argv[2],sys.argv[3])
-        mynewdir = analyze_directory_py(sys.argv[1], sys.argv[2], sys.argv[3])
-        print(mynewdir)
+    if validate_arguments(sys.argv):
+        print("-*- Valid inputs. Processing your request! -*-")
+        myvalidfiles = analyze_directory_py(sys.argv[1], sys.argv[2], sys.argv[3])
+        print("****** Files Older Than {} Days and Larger than {} Bytes. ******".format(sys.argv[3], sys.argv[2]))
+        print(" - Source Directory: {}".format(sys.argv[1]))
+        for file in myvalidfiles:
+            try:
+                print("File {} was last modified on {} and is {} bytes large.".format(file[0], file[1], file[2]))
+            except IndexError as e:
+                print(f" File info not properly returned.  {e}")
     else:
         display_hints()
 

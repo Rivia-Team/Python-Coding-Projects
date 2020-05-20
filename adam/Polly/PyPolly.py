@@ -27,15 +27,15 @@ from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 import os
 import sys
-import subprocess
 
+POLLY_CHAR_LIMIT = 3000
 
 def polly_request_speech(intext: str, intlanguage: str):
     """ Request Polly speech given text and language."""
     session = Session(profile_name="default")
     polly = session.client("polly")
     try:
-        response = polly.synthesize_speech(Text=intext,LanguageCode = intlanguage, OutputFormat="mp3", VoiceId="Joanna")
+        response = polly.synthesize_speech(Text=intext,LanguageCode = intlanguage,OutputFormat="mp3",VoiceId="Joanna")
         print(response)
     except (BotoCoreError, ClientError) as error:
         print(error)
@@ -59,23 +59,31 @@ def polly_write_response(inresponse: object):
         print("Could not stream audio")
         sys.exit(1)
 
+
 def get_user_text() -> str:
-    try:
+    """ Ensure the user request can go to Polly. """
+    validinput = False
+    while not validinput:
         intext = input("Which of your most favorite quotes can Polly cook up for you?")
-    except:
-        print("WTF")
+        if len(intext) > POLLY_CHAR_LIMIT:
+            print("You have entered in more text that Polly can support in one call.")
+            validinput = False
+        else:
+            validinput = True
     return intext
 
+
 def get_user_language() -> str:
+    """ Allow the user to choose from a pre-defined set of languages. """
     languages = {
-        "arabic":"arb",
-        "chinese":"cmn-CN",
-        "danish":"da-DK",
-        "english":"en-GB",
-        "french":"fr-FR",
-        "german":"de-DE",
-        "portuguese":"pl-PT",
-        "spanish":"es-ES"
+        "arabic": "arb",
+        "chinese": "cmn-CN",
+        "danish": "da-DK",
+        "english": "en-GB",
+        "french": "fr-FR",
+        "german": "de-DE",
+        "portuguese": "pl-PT",
+        "spanish": "es-ES"
     }
     textlang = input("What language do you want to hear?")
     try:

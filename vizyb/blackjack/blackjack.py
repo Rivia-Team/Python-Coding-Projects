@@ -16,7 +16,7 @@ class Card:
         """ Return an integer value for card """
         try:
             return int(self.value)
-        except Exception:
+        except ValueError:
             return 10
 
     def __repr__(self):
@@ -47,14 +47,12 @@ class Deck:
 
 class Player:
     """ A player within the game """
-    cards_value = 0
 
     def __init__(self, hand: List[Card] = None):
         self.hand = hand if hand is not None else []
 
     def clear_hand(self):
         self.hand = []
-        self.cards_value = 0
 
 
 class Dealer(Player):
@@ -85,7 +83,7 @@ class Gambler(Player):
 def validate_bet(player: Gambler, bet: str):
     """ Validate an incoming bet as a valid value """
 
-    if not re.match("\d+", bet):
+    if not re.match(r"\d+", bet):
         print("We only accept cash here.")
         return False
     if int(bet) < 0 or int(bet) > player.money:

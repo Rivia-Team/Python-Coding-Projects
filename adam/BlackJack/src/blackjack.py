@@ -168,8 +168,6 @@ class Game:
         self.losers = []
         self.winner = []
         self.dealer = Dealer("Mr. Dealer (^_^)", self.deck)
-        self.register_game()
-        self.the_play()
 
     def register_game(self) -> object:
         """ Setup a new game and request amount of players. """
@@ -229,6 +227,8 @@ class Game:
 
 def main():
     mygame = Game()
+    mygame.register_game()
+    mygame.the_play()
 
 
 if __name__ == "__main__":

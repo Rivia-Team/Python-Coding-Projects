@@ -9,19 +9,25 @@ Completed: AP -
 """
 
 import random
-import sys
 
 
 class Deck:
+
+    """
+    Provides a Class for holding a standard 52 card deck in a list of lists format.
+    """
+
     suites = ["clubs", "hearts", "spades", "diamonds"]
     cards = []
 
     def __init__(self):
+        """ Based off the suites being used populate a card deck. """
         for suite in self.suites:
             for card in self.gen_cards():
                 self.cards.append([suite, card])
 
     def gen_cards(self):
+        """ Generator to build a deck. """
         c = 1
         spec = {
             "11":"J",
@@ -37,9 +43,8 @@ class Deck:
                 yield spec[str(c)]
                 c +=1
 
-
-
     def deal_card(self) -> str:
+        """ From an established Deck this will return a card in list format. """
         myrand = random.randint(0, len(self.cards)-1)
         mycard = self.cards.pop(myrand)
         print("THIS CARD DEALT: {}".format(mycard))
@@ -47,6 +52,11 @@ class Deck:
 
 
 class Player:
+
+    """
+    Contains information related to a player and methods to manipulate player owned variables.
+    """
+
     def __init__(self, name, deck):
         self.deck = deck
         self.name = name
@@ -57,13 +67,11 @@ class Player:
         self.processed_cards = []
         self.total = 0
         self.done = False
-        print("My name is {} and I have these cards {}. I am a {}.".format(self.name, self.cards, self.role))
 
     def check_hand(self) -> str:
         """ See if the player can hit for another card or not.  """
         for card in range(0,len(self.cards)):
             if self.cards[card][1] not in self.processed_cards:
-                #print(f"Trying to add {self.cards[card][1]}")
                 if isinstance(self.cards[card][1], int):
                     self.total += self.cards[card][1]
                 elif self.cards[card][1] in ["J", "Q", "K"]:
@@ -71,12 +79,13 @@ class Player:
                 elif self.cards[card][1] == "A":
                     if self.role == "DEALER":
                         myval = "11"
+                        self.total += int(myval)
                     else:
                         myval = input("Would you like this to count as a 1 or 11?")
-                    self.total += int(myval)
+                        self.total += int(myval)
                 self.processed_cards.append(self.cards[card][1])
-                if self.role == "NON-DEALER":
-                    print("Total for {} is now: {}: \n".format(self.name, self.total))
+            if self.role == "NON-DEALER":
+                print("Total for {} is now: {}: \n".format(self.name, self.total))
         if self.role == "NON-DEALER":
             if self.total < 21:
                 return "READY"
@@ -123,7 +132,13 @@ class Player:
 
 
 class Dealer(Player):
+
+    """
+    A type of player that deals cards to other players.
+    """
+
     def __init__(self, myname, deck):
+        """ Calls on Parent class to provide most functionality. """
         super().__init__(myname, deck)
         self.role = "DEALER"
         self.deck = deck
@@ -136,11 +151,15 @@ class Dealer(Player):
         print("Dealer has this cards {}.".format(self.cards))
 
     def draw_card(self):
+        """ Deals a card for the Dealer. """
         self.cards.append(self.deck.deal_card())
 
 
-
 class Game:
+
+    """
+    The core logic to run the game and take action on Players.  Decides who wins, controls the tempo.
+    """
 
     def __init__(self):
         self.deck = Deck()
@@ -179,6 +198,7 @@ class Game:
             return False
 
     def end_game(self):
+        """ Check if a player has a higher total than the dealer.  """
         for player in self.players:
             if player.total > self.dealer.total:
                 player.won = 1

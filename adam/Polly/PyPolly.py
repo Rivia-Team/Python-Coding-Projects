@@ -72,6 +72,8 @@ def get_user_text() -> str:
             validinput = True
     return intext
 
+def get_audio_file():
+    os.system("open speech.mp3")
 
 def get_user_language() -> str:
     """ Allow the user to choose from a pre-defined set of languages. """
@@ -97,6 +99,7 @@ def main():
     requestlang = get_user_language()
     myspeech = polly_request_speech(requesttxt, requestlang)
     polly_write_response(myspeech)
+    get_audio_file()
 
 
 if __name__ == "__main__":

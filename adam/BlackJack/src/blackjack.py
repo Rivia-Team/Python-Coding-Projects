@@ -58,6 +58,7 @@ class Player:
     """
 
     def __init__(self, name, deck):
+        self.cash = 50
         self.deck = deck
         self.name = name
         self.role = "NON-DEALER"
@@ -84,8 +85,8 @@ class Player:
                         myval = input("Would you like this to count as a 1 or 11?")
                         self.total += int(myval)
                 self.processed_cards.append(self.cards[card][1])
-            if self.role == "NON-DEALER":
-                print("Total for {} is now: {}: \n".format(self.name, self.total))
+            '''if self.role == "NON-DEALER":
+                print("Total for {} is now: {}: \n".format(self.name, self.total))'''
         if self.role == "NON-DEALER":
             if self.total < 21:
                 return "READY"
@@ -111,11 +112,10 @@ class Player:
     def request_hit_card(self):
         """ Prompt player to hit for a new card or continue play. """
         if self.role == "NON-DEALER" and self.done == False:
-            if self.check_hand() == "READY":
+            if self.lost == 0:
                 getcard = input("Would you like to HIT for a new card?")
                 if getcard.lower() in ["yes", "y"]:
                     self.cards.append(self.deck.deal_card())
-                    self.check_hand()
                 else:
                     self.done = True
                 return self.done
@@ -123,10 +123,10 @@ class Player:
                 self.done = True
                 self.lost = 1
         elif self.role == "DEALER":
-            if self.check_hand() == "READY":
-                self.cards.append(self.deck.deal_card())
-                self.check_hand()
-                print(self.total)
+            #if self.check_hand() == "READY":
+                #self.cards.append(self.deck.deal_card())
+            self.check_hand()
+            print("MYTOTAL IS {}".format(self.total))
         else:
             return self.done
 
@@ -210,10 +210,12 @@ class Game:
             if player.done != True:
                 player.request_hit_card()
                 player.check_hand()
+                print("Player {} has this total: {}\n".format(player.name, player.total))
                 self.dealer.check_hand()
                 if player.done != True:
                     self.dealer.draw_card()
-                    pass
+                    self.dealer.check_hand()
+                    print("Dealer has this total: {}\n".format(self.dealer.total))
             if player.done == True:
                 print("Ending game...")
                 self.end_game()
@@ -223,6 +225,8 @@ class Game:
         self.dealer.deal_cards(self.players)
         while self.check_game_status():
             self.get_play()
+            if self.dealer.lost == 1:
+                self.end_game()
 
 
 def main():

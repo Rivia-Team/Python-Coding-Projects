@@ -59,6 +59,7 @@ class Player:
 
     def __init__(self, name, deck):
         self.cash = 50
+        self.bet = 0
         self.deck = deck
         self.name = name
         self.role = "NON-DEALER"
@@ -85,13 +86,12 @@ class Player:
                         myval = input("Would you like this to count as a 1 or 11?")
                         self.total += int(myval)
                 self.processed_cards.append(self.cards[card][1])
-            '''if self.role == "NON-DEALER":
-                print("Total for {} is now: {}: \n".format(self.name, self.total))'''
         if self.role == "NON-DEALER":
             if self.total < 21:
                 return "READY"
             elif self.total == 21:
                 self.won = 1
+                self.set_cash(self.cash + self.bet)
                 #print("{} WON!!!!".format(self.name))
                 #sys.exit(0)
             else:
@@ -129,6 +129,20 @@ class Player:
             print("MYTOTAL IS {}".format(self.total))
         else:
             return self.done
+
+    def set_bet(self, playerbet=0):
+        """ Allow the player to place a bet."""
+        self.bet = playerbet
+
+    def set_cash(self, mycash=50):
+        self.cash = mycash
+
+    def get_total_cash(self):
+        return self.cash
+
+    def get_bet(self):
+        return self.bet
+
 
 
 class Dealer(Player):

@@ -1,7 +1,4 @@
-#import blackjack
 from src import blackjack
-from unittest import mock
-import pytest
 
 # Initialize some instances of the classes to test methods.
 
@@ -50,17 +47,34 @@ def test_Player_check_loss():
     myplayer.check_hand()
     assert myplayer.lost == 1
 
+
 def test_Player_cash():
+    """ Make sure cash was set for player. """
     assert myplayer.cash > 0
 
-def test_Player_bet():
-    assert myplayer.bet > 0
 
-def test_Player_request_car():
-    assert myplayer.check_hand() == True
+def test_Player_bet():
+    """ Test that the player bet can be changed. """
+    myplayer.set_bet(100)
+    assert myplayer.bet == 100
+
+
+def test_Player_win_double_bet():
+    """ If player wins their bet should be doubled. """
+    myplayer.set_bet(50)
+    myplayer.set_cash(50)
+    myplayer.total = 21
+    myplayer.check_hand()
+    assert myplayer.get_total_cash() == 100
+
+
+def test_Player_request_card():
+    """ Ensure that the function to get a score tally of player hand functions. """
+    assert myplayer.check_hand() == "DONE"
+
 
 def test_Game_status():
     """ Check that the game ends if 21 is reached.  """
     myplayer.total = 21
     myplayer.check_hand()
-    assert mygame.check_game_status() == True
+    assert mygame.check_game_status() is False
